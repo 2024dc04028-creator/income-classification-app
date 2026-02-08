@@ -77,8 +77,7 @@ if uploaded_file is not None:
     # -------------------------------------------------
     # Feature scaling
     # -------------------------------------------------
-    X_scaled = scaler.transform(X)
-
+    X_scaled = scaler.transform(X.values)
     # -------------------------------------------------
     # Model prediction
     # -------------------------------------------------
