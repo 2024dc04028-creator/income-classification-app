@@ -2,42 +2,47 @@
 
 ## a. Problem Statement
 
-The objective of this project is to build and compare multiple machine learning
+The aim of this project is to design and evaluate multiple machine learning
 classification models to predict whether an individual’s annual income exceeds
-$50,000 based on demographic and employment-related attributes.
-The task is formulated as a supervised classification problem.
+$50,000. The prediction is based on demographic, educational, and employment-
+related attributes. This problem is treated as a supervised binary classification
+task, where the objective is to compare different models and identify the most
+effective one using appropriate evaluation metrics.
 
 ---
 
 ## b. Dataset Description
 
-The Adult Income Dataset was obtained from the UCI Machine Learning Repository.
-The dataset contains census-related information and is widely used for
-benchmarking classification algorithms.
+The dataset used for this project is the Adult Income Dataset obtained from the
+UCI Machine Learning Repository. The dataset contains census data collected from
+individuals and includes both numerical and categorical features that describe
+personal, educational, and occupational characteristics.
 
-- Type of problem: Binary classification
-- Target variable: Income (≤50K, >50K)
-- Number of instances: More than 48,000
-- Number of features: 14
-- Feature types: Numerical and Categorical
+- Nature of problem: Binary classification  
+- Target variable: Income category (≤50K or >50K)  
+- Number of instances: More than 48,000 records  
+- Number of features: 14 input attributes  
+- Feature types: Combination of numerical and categorical variables  
 
-Missing values were handled, categorical variables were encoded, and the dataset
-was split into training and testing sets before model implementation.
+Prior to model implementation, missing values were handled, categorical
+variables were encoded into numerical form, and the dataset was split into
+training and testing subsets. Feature scaling was applied where required to
+ensure fair model comparison.
 
 ---
 
 ## c. Models Used and Evaluation Metrics
 
-The following six classification models were implemented and evaluated using
-standard performance metrics.
+Six different machine learning classification models were implemented on the
+same dataset to ensure a fair comparison. Each model was evaluated using the
+following metrics:
 
-Evaluation Metrics Used:
-- Accuracy
-- AUC Score
-- Precision
-- Recall
-- F1 Score
-- Matthews Correlation Coefficient (MCC)
+- Accuracy  
+- Area Under the ROC Curve (AUC)  
+- Precision  
+- Recall  
+- F1 Score  
+- Matthews Correlation Coefficient (MCC)  
 
 ---
 
@@ -45,15 +50,12 @@ Evaluation Metrics Used:
 
 | ML Model Name | Accuracy | AUC | Precision | Recall | F1 Score | MCC |
 |--------------|----------|-----|-----------|--------|----------|-----|
-| Logistic Regression | XX.XX | XX.XX | XX.XX | XX.XX | XX.XX | XX.XX |
-| Decision Tree | XX.XX | XX.XX | XX.XX | XX.XX | XX.XX | XX.XX |
-| KNN | XX.XX | XX.XX | XX.XX | XX.XX | XX.XX | XX.XX |
-| Naive Bayes | XX.XX | XX.XX | XX.XX | XX.XX | XX.XX | XX.XX |
-| Random Forest (Ensemble) | XX.XX | XX.XX | XX.XX | XX.XX | XX.XX | XX.XX |
-| AdaBoost (Ensemble)* | XX.XX | XX.XX | XX.XX | XX.XX | XX.XX | XX.XX |
-
-*Note: AdaBoost was used as the boosting ensemble model due to environment
-limitations in place of XGBoost.*
+| Logistic Regression | 0.8229 | 0.8598 | 0.7442 | 0.4601 | 0.5687 | 0.4863 |
+| Decision Tree | 0.8074 | 0.7458 | 0.6201 | 0.6209 | 0.6205 | 0.4915 |
+| K-Nearest Neighbors | 0.8251 | 0.8588 | 0.6761 | 0.5961 | 0.6336 | 0.5211 |
+| Naive Bayes | 0.7984 | 0.8595 | 0.7099 | 0.3471 | 0.4662 | 0.3946 |
+| Random Forest (Ensemble) | 0.8563 | 0.9077 | 0.7552 | 0.6412 | 0.6935 | 0.6039 |
+| AdaBoost (Ensemble) | 0.8502 | 0.8996 | 0.7726 | 0.5797 | 0.6624 | 0.5783 |
 
 ---
 
@@ -61,18 +63,19 @@ limitations in place of XGBoost.*
 
 | ML Model Name | Observation about Model Performance |
 |--------------|--------------------------------------|
-| Logistic Regression | Provided a strong baseline performance with balanced precision and recall. It performed well due to the linear separability of some features but was limited in capturing complex relationships. |
-| Decision Tree | Achieved reasonable accuracy but showed signs of overfitting. Performance varied depending on feature splits and tree depth. |
-| KNN | Performance depended heavily on the choice of k and feature scaling. It was computationally more expensive and less effective for larger datasets. |
-| Naive Bayes | Fast and simple model with comparatively lower performance. The independence assumption among features limited its effectiveness on this dataset. |
-| Random Forest (Ensemble) | Demonstrated strong performance across all metrics. The ensemble of decision trees reduced overfitting and improved generalization. |
-| AdaBoost (Ensemble) | Showed improved performance over individual classifiers by focusing on misclassified samples. It achieved high AUC and F1 scores, making it one of the best-performing models. |
+| Logistic Regression | The model provided a reliable baseline with good accuracy and AUC. However, its relatively low recall indicates that it missed a significant number of high-income instances, which reduced its overall F1 score. |
+| Decision Tree | The decision tree achieved balanced precision and recall but showed lower AUC and accuracy compared to other models, suggesting limited generalization capability. |
+| K-Nearest Neighbors | KNN performed better than simpler models in terms of F1 score and MCC. Its effectiveness depended strongly on feature scaling and neighborhood selection. |
+| Naive Bayes | Although the model achieved a reasonable AUC, it showed very low recall, indicating that the independence assumption among features negatively affected its performance. |
+| Random Forest (Ensemble) | Random Forest achieved the best overall performance across most evaluation metrics. The ensemble of multiple trees improved prediction stability and reduced overfitting. |
+| AdaBoost (Ensemble) | AdaBoost demonstrated strong precision and AUC by emphasizing misclassified samples. While recall was slightly lower than Random Forest, the overall performance remained robust. |
 
 ---
 
 ## Conclusion
 
-Among all the models implemented, ensemble methods such as Random Forest and
-AdaBoost performed the best across most evaluation metrics. This demonstrates
-the effectiveness of ensemble learning techniques in handling complex and
-real-world classification problems.
+The experimental results show that ensemble-based models outperform individual
+classifiers on the Adult Income dataset. Random Forest emerged as the most
+effective model based on Accuracy, AUC, F1 Score, and MCC. This highlights the
+importance of ensemble learning techniques for solving complex real-world
+classification problems.
