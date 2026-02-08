@@ -16,11 +16,12 @@ st.title("Income Classification App")
 models = {
     "Logistic Regression": joblib.load("model/logistic_regression.pkl"),
     "Decision Tree": joblib.load("model/decision_tree.pkl"),
-    "KNN": joblib.load("model/k-nearest_neighbors.pkl"),
-    "Naive Bayes": joblib.load("model/naive_bayes_gaussian.pkl"),
+    "KNN": joblib.load("model/knn.pkl"),
+    "Naive Bayes": joblib.load("model/naive_bayes.pkl"),
     "Random Forest": joblib.load("model/random_forest.pkl"),
-    "AdaBoost": joblib.load("model/adaboost_ensemble.pkl")
+    "AdaBoost": joblib.load("model/adaboost.pkl")
 }
+
 
 scaler = joblib.load("model/scaler.pkl")
 
