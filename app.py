@@ -19,12 +19,12 @@ from sklearn.metrics import (
 st.title("Income Classification App")
 
 st.write(
-    "This application allows uploading a CSV test dataset, selecting a "
-    "classification model, and evaluating model performance."
+    "Upload a CSV test dataset, select a classification model, "
+    "and evaluate model performance."
 )
 
 # -------------------------------------------------
-# Load trained models
+# Load trained models, scaler, and feature names
 # -------------------------------------------------
 models = {
     "Logistic Regression": joblib.load("model/logistic_regression.pkl"),
@@ -36,9 +36,10 @@ models = {
 }
 
 scaler = joblib.load("model/scaler.pkl")
+feature_names = joblib.load("model/feature_names.pkl")
 
 # -------------------------------------------------
-# a. Dataset Upload Option (CSV)
+# Dataset Upload
 # -------------------------------------------------
 uploaded_file = st.file_uploader(
     "Upload TEST Dataset (CSV format only)",
@@ -46,7 +47,7 @@ uploaded_file = st.file_uploader(
 )
 
 # -------------------------------------------------
-# b. Model Selection Dropdown
+# Model Selection
 # -------------------------------------------------
 model_name = st.selectbox(
     "Select Classification Model",
@@ -62,9 +63,9 @@ if uploaded_file is not None:
     st.subheader("Uploaded Dataset Preview")
     st.dataframe(df.head())
 
-    # -------------------------------------------------
+    # --------------------------------------------
     # Handle target column safely
-    # -------------------------------------------------
+    # --------------------------------------------
     if "income" in df.columns:
         X = df.drop("income", axis=1)
         y = df["income"]
@@ -74,19 +75,35 @@ if uploaded_file is not None:
         y = None
         labels_available = False
 
-    # -------------------------------------------------
-    # Feature scaling
-    # -------------------------------------------------
+    # --------------------------------------------
+    # FORCE NUMERIC DATA (CRITICAL FIX)
+    # --------------------------------------------
+    X = X.apply(pd.to_numeric, errors="coerce")
+    X = X.fillna(0)
+
+    # --------------------------------------------
+    # ALIGN FEATURES WITH TRAINING DATA
+    # --------------------------------------------
+    for col in feature_names:
+        if col not in X.columns:
+            X[col] = 0
+
+    X = X[feature_names]  # correct order
+
+    # --------------------------------------------
+    # Scale features (NumPy only)
+    # --------------------------------------------
     X_scaled = scaler.transform(X.values)
-    # -------------------------------------------------
-    # Model prediction
-    # -------------------------------------------------
+
+    # --------------------------------------------
+    # Prediction
+    # --------------------------------------------
     model = models[model_name]
     y_pred = model.predict(X_scaled)
 
-    # -------------------------------------------------
-    # c. Display Evaluation Metrics
-    # -------------------------------------------------
+    # --------------------------------------------
+    # Evaluation
+    # --------------------------------------------
     if labels_available:
         st.subheader("Evaluation Metrics")
 
@@ -100,11 +117,7 @@ if uploaded_file is not None:
         st.write(f"Recall: {rec:.4f}")
         st.write(f"F1 Score: {f1:.4f}")
 
-        # -------------------------------------------------
-        # d. Confusion Matrix
-        # -------------------------------------------------
         st.subheader("Confusion Matrix")
-
         cm = confusion_matrix(y, y_pred)
 
         fig, ax = plt.subplots()
@@ -113,16 +126,13 @@ if uploaded_file is not None:
         ax.set_ylabel("Actual")
         st.pyplot(fig)
 
-        # -------------------------------------------------
-        # Classification Report
-        # -------------------------------------------------
         st.subheader("Classification Report")
         st.text(classification_report(y, y_pred))
 
     else:
         st.warning(
-            "Target column 'income' not found in uploaded dataset. "
-            "Displaying predictions only."
+            "Target column 'income' not found. "
+            "Showing predictions only."
         )
 
         df["Predicted_income"] = y_pred
