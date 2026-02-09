@@ -1,8 +1,9 @@
 st.subheader("Test Dataset Download")
 
 st.markdown(
-    "[Download test CSV file](https://raw.githubusercontent.com/USERNAME/REPO_NAME/main/test_income_data.csv)"
+    "[Click here to download test CSV file](https://raw.githubusercontent.com/2024dc04028-creator/income-classification-app/main/test_income_data.csv)"
 )
+
 
 import streamlit as st
 import pandas as pd
