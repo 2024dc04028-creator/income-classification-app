@@ -1,15 +1,14 @@
-st.subheader("Test Dataset Download")
-
-st.markdown(
-    "[Click here to download test CSV file](https://raw.githubusercontent.com/2024dc04028-creator/income-classification-app/main/test_income_data.csv)"
-)
-
-
 import streamlit as st
 import pandas as pd
 import joblib
 import seaborn as sns
 import matplotlib.pyplot as plt
+
+st.subheader("Test Dataset Download")
+
+st.markdown(
+    "[Click here to download test CSV file](https://raw.githubusercontent.com/2024dc04028-creator/income-classification-app/main/test_income_data.csv)"
+)
 
 from sklearn.metrics import (
     accuracy_score,
