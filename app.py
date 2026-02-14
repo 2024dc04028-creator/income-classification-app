@@ -25,7 +25,7 @@ st.markdown(
 )
 
 # -------------------------------------------------
-# Load Models and Preprocessing Objects
+# Load Models and Objects
 # -------------------------------------------------
 models = {
     "Logistic Regression": joblib.load("model/logistic_regression.pkl"),
@@ -40,7 +40,7 @@ scaler = joblib.load("model/scaler.pkl")
 feature_names = joblib.load("model/feature_names.pkl")
 
 # -------------------------------------------------
-# Model Selection Dropdown
+# Model Selection
 # -------------------------------------------------
 model_name = st.selectbox(
     "Select Classification Model",
@@ -48,7 +48,7 @@ model_name = st.selectbox(
 )
 
 # -------------------------------------------------
-# Load Default Test Dataset Automatically
+# Load Default Dataset
 # -------------------------------------------------
 default_data = pd.read_csv("test_income_data.csv")
 
@@ -85,30 +85,44 @@ else:
 X = X.apply(pd.to_numeric, errors="coerce")
 X = X.fillna(0)
 
-# -------------------------------------------------
-# Align Features with Training
-# -------------------------------------------------
+# Align features
 for col in feature_names:
     if col not in X.columns:
         X[col] = 0
 
 X = X[feature_names]
 
-# -------------------------------------------------
-# Scale Features
-# -------------------------------------------------
+# Scale
 X_scaled = scaler.transform(X.values)
 
 # -------------------------------------------------
-# Predict
+# Predict Selected Model
 # -------------------------------------------------
 model = models[model_name]
 y_pred = model.predict(X_scaled)
 
 # -------------------------------------------------
+# Evaluate ALL models to determine BEST
+# -------------------------------------------------
+best_model_name = None
+best_accuracy = 0
+
+if labels_available:
+    for name, m in models.items():
+        temp_pred = m.predict(X_scaled)
+        temp_acc = accuracy_score(y, temp_pred)
+
+        if temp_acc > best_accuracy:
+            best_accuracy = temp_acc
+            best_model_name = name
+
+# -------------------------------------------------
 # Display Results
 # -------------------------------------------------
 if labels_available:
+
+    # 🏆 Best Model Display
+    st.success(f"🏆 Best Model Based on Accuracy: {best_model_name} ({best_accuracy:.4f})")
 
     st.subheader(f"{model_name} - Evaluation Metrics")
 
