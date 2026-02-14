@@ -10,6 +10,7 @@ from sklearn.metrics import (
     precision_score,
     recall_score,
     f1_score,
+    roc_auc_score,
     confusion_matrix,
     classification_report
 )
@@ -21,21 +22,19 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 
 # -------------------------------------------------
-# App Title
+# Page Config
 # -------------------------------------------------
-st.title("Income Classification App")
+st.set_page_config(page_title="Income Classification App", layout="wide")
 
-st.subheader("Test Dataset Download")
-
-st.markdown(
-    "[Click here to download test CSV file](https://raw.githubusercontent.com/2024dc04028-creator/income-classification-app/main/test_income_data.csv)"
-)
+st.title("Income Classification Using Machine Learning")
 
 # -------------------------------------------------
-# Model Selection
+# Sidebar
 # -------------------------------------------------
-model_name = st.selectbox(
-    "Select Classification Model",
+st.sidebar.header("Model Selection")
+
+model_name = st.sidebar.selectbox(
+    "Choose Model",
     [
         "Logistic Regression",
         "Decision Tree",
@@ -46,58 +45,55 @@ model_name = st.selectbox(
     ]
 )
 
+uploaded_file = st.sidebar.file_uploader(
+    "Upload Test Dataset (Optional)",
+    type=["csv"]
+)
+
 # -------------------------------------------------
 # Load Default Dataset
 # -------------------------------------------------
 default_data = pd.read_csv("test_income_data.csv")
 
-uploaded_file = st.file_uploader(
-    "Upload New Test Dataset (Optional)",
-    type=["csv"]
-)
-
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
-    st.success("Custom dataset loaded successfully.")
+    st.sidebar.success("Custom dataset loaded.")
 else:
     df = default_data
-    st.info("Default test dataset loaded automatically.")
+    st.sidebar.info("Using default test dataset.")
 
+# -------------------------------------------------
+# Display Dataset
+# -------------------------------------------------
 st.subheader("Dataset Preview")
 st.dataframe(df.head())
 
 # -------------------------------------------------
-# Handle Target Column
+# Check Target Column
 # -------------------------------------------------
 if "income" not in df.columns:
-    st.error("Uploaded dataset must contain 'income' column to compute metrics.")
+    st.error("Dataset must contain 'income' column.")
     st.stop()
 
 X = df.drop("income", axis=1)
 y = df["income"]
 
-# -------------------------------------------------
-# Safe Numeric Conversion
-# -------------------------------------------------
+# Convert to numeric
 X = X.apply(pd.to_numeric, errors="coerce")
 X = X.fillna(0)
 
-# -------------------------------------------------
 # Train-Test Split
-# -------------------------------------------------
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
 
-# -------------------------------------------------
-# Feature Scaling
-# -------------------------------------------------
+# Scale
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 
 # -------------------------------------------------
-# Initialize Models
+# Models Dictionary
 # -------------------------------------------------
 models = {
     "Logistic Regression": LogisticRegression(max_iter=1000),
@@ -111,32 +107,42 @@ models = {
 }
 
 # -------------------------------------------------
+# Evaluate All Models (For Comparison)
+# -------------------------------------------------
+results = []
+
+for name, model in models.items():
+    model.fit(X_train, y_train)
+    preds = model.predict(X_test)
+    probas = model.predict_proba(X_test)[:, 1]
+
+    acc = accuracy_score(y_test, preds)
+    auc = roc_auc_score(y_test, probas)
+
+    results.append((name, acc, auc))
+
+results_df = pd.DataFrame(results, columns=["Model", "Accuracy", "AUC"])
+
+# -------------------------------------------------
+# Best Model
+# -------------------------------------------------
+best_model = results_df.sort_values("Accuracy", ascending=False).iloc[0]
+
+st.success(
+    f"🏆 Best Model Based on Accuracy: {best_model['Model']} ({best_model['Accuracy']:.4f})"
+)
+
+# -------------------------------------------------
 # Train Selected Model
 # -------------------------------------------------
-model = models[model_name]
-model.fit(X_train, y_train)
+selected_model = models[model_name]
+selected_model.fit(X_train, y_train)
 
-y_pred = model.predict(X_test)
-
-# -------------------------------------------------
-# Find Best Model (Based on Accuracy)
-# -------------------------------------------------
-best_model_name = ""
-best_accuracy = 0
-
-for name, m in models.items():
-    m.fit(X_train, y_train)
-    temp_pred = m.predict(X_test)
-    temp_acc = accuracy_score(y_test, temp_pred)
-
-    if temp_acc > best_accuracy:
-        best_accuracy = temp_acc
-        best_model_name = name
-
-st.success(f"🏆 Best Model Based on Accuracy: {best_model_name} ({best_accuracy:.4f})")
+y_pred = selected_model.predict(X_test)
+y_prob = selected_model.predict_proba(X_test)[:, 1]
 
 # -------------------------------------------------
-# Display Metrics
+# Metrics Display
 # -------------------------------------------------
 st.subheader(f"{model_name} - Evaluation Metrics")
 
@@ -144,12 +150,14 @@ acc = accuracy_score(y_test, y_pred)
 prec = precision_score(y_test, y_pred)
 rec = recall_score(y_test, y_pred)
 f1 = f1_score(y_test, y_pred)
+auc = roc_auc_score(y_test, y_prob)
 
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4, col5 = st.columns(5)
 col1.metric("Accuracy", f"{acc:.4f}")
 col2.metric("Precision", f"{prec:.4f}")
 col3.metric("Recall", f"{rec:.4f}")
 col4.metric("F1 Score", f"{f1:.4f}")
+col5.metric("AUC Score", f"{auc:.4f}")
 
 # -------------------------------------------------
 # Confusion Matrix
@@ -169,3 +177,14 @@ st.pyplot(fig)
 # -------------------------------------------------
 st.subheader(f"{model_name} - Classification Report")
 st.text(classification_report(y_test, y_pred))
+
+# -------------------------------------------------
+# Model Comparison Chart
+# -------------------------------------------------
+st.subheader("Model Comparison (Accuracy)")
+
+fig2, ax2 = plt.subplots()
+ax2.bar(results_df["Model"], results_df["Accuracy"])
+ax2.set_ylabel("Accuracy")
+ax2.set_xticklabels(results_df["Model"], rotation=45, ha="right")
+st.pyplot(fig2)
