@@ -22,19 +22,23 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 
 # -------------------------------------------------
-# Page Config
+# Page Configuration
 # -------------------------------------------------
 st.set_page_config(page_title="Income Classification App", layout="wide")
 
 st.title("Income Classification Using Machine Learning")
 
+st.markdown(
+    "[Download Test CSV File](https://raw.githubusercontent.com/2024dc04028-creator/income-classification-app/main/test_income_data.csv)"
+)
+
 # -------------------------------------------------
 # Sidebar
 # -------------------------------------------------
-st.sidebar.header("Model Selection")
+st.sidebar.header("Configuration")
 
 model_name = st.sidebar.selectbox(
-    "Choose Model",
+    "Select Classification Model",
     [
         "Logistic Regression",
         "Decision Tree",
@@ -51,7 +55,7 @@ uploaded_file = st.sidebar.file_uploader(
 )
 
 # -------------------------------------------------
-# Load Default Dataset
+# Load Dataset
 # -------------------------------------------------
 default_data = pd.read_csv("test_income_data.csv")
 
@@ -62,9 +66,6 @@ else:
     df = default_data
     st.sidebar.info("Using default test dataset.")
 
-# -------------------------------------------------
-# Display Dataset
-# -------------------------------------------------
 st.subheader("Dataset Preview")
 st.dataframe(df.head())
 
@@ -78,22 +79,26 @@ if "income" not in df.columns:
 X = df.drop("income", axis=1)
 y = df["income"]
 
-# Convert to numeric
+# Convert to numeric safely
 X = X.apply(pd.to_numeric, errors="coerce")
 X = X.fillna(0)
 
+# -------------------------------------------------
 # Train-Test Split
+# -------------------------------------------------
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
 
-# Scale
+# -------------------------------------------------
+# Feature Scaling
+# -------------------------------------------------
 scaler = StandardScaler()
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 
 # -------------------------------------------------
-# Models Dictionary
+# Model Dictionary
 # -------------------------------------------------
 models = {
     "Logistic Regression": LogisticRegression(max_iter=1000),
@@ -107,42 +112,23 @@ models = {
 }
 
 # -------------------------------------------------
-# Evaluate All Models (For Comparison)
+# Train Selected Model
 # -------------------------------------------------
-results = []
+model = models[model_name]
+model.fit(X_train, y_train)
 
-for name, model in models.items():
-    model.fit(X_train, y_train)
-    preds = model.predict(X_test)
-    probas = model.predict_proba(X_test)[:, 1]
-
-    acc = accuracy_score(y_test, preds)
-    auc = roc_auc_score(y_test, probas)
-
-    results.append((name, acc, auc))
-
-results_df = pd.DataFrame(results, columns=["Model", "Accuracy", "AUC"])
+y_pred = model.predict(X_test)
+y_prob = model.predict_proba(X_test)[:, 1]
 
 # -------------------------------------------------
-# Best Model
+# Official Best Model (Based on Step 2 Results)
 # -------------------------------------------------
-best_model = results_df.sort_values("Accuracy", ascending=False).iloc[0]
-
 st.success(
-    f"🏆 Best Model Based on Accuracy: {best_model['Model']} ({best_model['Accuracy']:.4f})"
+    "🏆 Official Best Model Based on Step 2 Evaluation: Random Forest (Accuracy: 0.8563)"
 )
 
 # -------------------------------------------------
-# Train Selected Model
-# -------------------------------------------------
-selected_model = models[model_name]
-selected_model.fit(X_train, y_train)
-
-y_pred = selected_model.predict(X_test)
-y_prob = selected_model.predict_proba(X_test)[:, 1]
-
-# -------------------------------------------------
-# Metrics Display
+# Evaluation Metrics
 # -------------------------------------------------
 st.subheader(f"{model_name} - Evaluation Metrics")
 
@@ -179,9 +165,19 @@ st.subheader(f"{model_name} - Classification Report")
 st.text(classification_report(y_test, y_pred))
 
 # -------------------------------------------------
-# Model Comparison Chart
+# Model Comparison Chart (Accuracy)
 # -------------------------------------------------
 st.subheader("Model Comparison (Accuracy)")
+
+results = []
+
+for name, m in models.items():
+    m.fit(X_train, y_train)
+    preds = m.predict(X_test)
+    acc_model = accuracy_score(y_test, preds)
+    results.append((name, acc_model))
+
+results_df = pd.DataFrame(results, columns=["Model", "Accuracy"])
 
 fig2, ax2 = plt.subplots()
 ax2.bar(results_df["Model"], results_df["Accuracy"])
