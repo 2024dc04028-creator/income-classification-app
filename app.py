@@ -29,9 +29,9 @@ st.set_page_config(page_title="Income Classification App", layout="wide")
 st.title("Income Classification Using Machine Learning")
 
 # -------------------------------------------------
-# Load Default Dataset FIRST (needed for download button)
+# Load Example Dataset FIRST (needed for download button)
 # -------------------------------------------------
-default_data = pd.read_csv("test_income_data.csv")
+example_data = pd.read_csv("test_income_data.csv")
 
 # -------------------------------------------------
 # Sidebar
@@ -51,19 +51,19 @@ model_name = st.sidebar.selectbox(
 )
 
 uploaded_file = st.sidebar.file_uploader(
-    "Upload Test Dataset (Optional)",
+    "Upload Dataset (Optional)",
     type=["csv"]
 )
 
-# ✅ DOWNLOAD BUTTON ADDED HERE
-st.sidebar.markdown("### Download Default Test Dataset")
+# ✅ Renamed Section
+st.sidebar.markdown("### Download Example Dataset")
 
-csv_data = default_data.to_csv(index=False).encode("utf-8")
+csv_data = example_data.to_csv(index=False).encode("utf-8")
 
 st.sidebar.download_button(
-    label="Download test_income_data.csv",
+    label="Download example_dataset.csv",
     data=csv_data,
-    file_name="test_income_data.csv",
+    file_name="example_dataset.csv",
     mime="text/csv"
 )
 
@@ -74,8 +74,8 @@ if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
     st.sidebar.success("Custom dataset loaded.")
 else:
-    df = default_data
-    st.sidebar.info("Using default test dataset.")
+    df = example_data
+    st.sidebar.info("Using example dataset.")
 
 # -------------------------------------------------
 # Display Dataset
