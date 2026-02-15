@@ -55,7 +55,6 @@ uploaded_file = st.sidebar.file_uploader(
     type=["csv"]
 )
 
-# ✅ Renamed Section
 st.sidebar.markdown("### Download Example Dataset")
 
 csv_data = example_data.to_csv(index=False).encode("utf-8")
