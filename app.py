@@ -29,6 +29,11 @@ st.set_page_config(page_title="Income Classification App", layout="wide")
 st.title("Income Classification Using Machine Learning")
 
 # -------------------------------------------------
+# Load Default Dataset FIRST (needed for download button)
+# -------------------------------------------------
+default_data = pd.read_csv("test_income_data.csv")
+
+# -------------------------------------------------
 # Sidebar
 # -------------------------------------------------
 st.sidebar.header("Model Selection")
@@ -50,11 +55,21 @@ uploaded_file = st.sidebar.file_uploader(
     type=["csv"]
 )
 
-# -------------------------------------------------
-# Load Default Dataset
-# -------------------------------------------------
-default_data = pd.read_csv("test_income_data.csv")
+# ✅ DOWNLOAD BUTTON ADDED HERE
+st.sidebar.markdown("### Download Default Test Dataset")
 
+csv_data = default_data.to_csv(index=False).encode("utf-8")
+
+st.sidebar.download_button(
+    label="Download test_income_data.csv",
+    data=csv_data,
+    file_name="test_income_data.csv",
+    mime="text/csv"
+)
+
+# -------------------------------------------------
+# Load Dataset
+# -------------------------------------------------
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
     st.sidebar.success("Custom dataset loaded.")
